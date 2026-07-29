@@ -35,9 +35,24 @@ jobs:
       run: |
         bun run build || npx vite build || true
 
-    # ИСПРАВЛЕННЫЙ ШАГ: Просто синхронизируем код с уже готовой папкой android
-    - name: Sync Capacitor
+    # ЖЁСТКО СОЗДАЕМ КОНФИГ ТАК, КАК ТРЕБУЕТ РОБОТ
+    - name: Create Capacitor Config
       run: |
+        cat <<EOF > capacitor.config.ts
+        import { CapacitorConfig } from '@capacitor/cli';
+        const config: CapacitorConfig = {
+          appId: 'com.pulselink.messenger',
+          appName: 'PulseLink Messenger',
+          webDir: '.output/public'
+        };
+        export default config;
+        EOF
+
+    # УДАЛЯЕМ СТАРЫЙ МУСОР И СОЗДАЕМ АНДРОИД С НУЛЯ
+    - name: Initialize Capacitor Android
+      run: |
+        rm -rf android || true
+        npx cap add android
         npx cap sync android
 
     - name: Set up JDK 17
