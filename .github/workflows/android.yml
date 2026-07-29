@@ -31,19 +31,17 @@ jobs:
         bun install
         bun add @capacitor/core @capacitor/cli @capacitor/android
 
-    # Собираем строго статический клиентский SPA
-    - name: Build SPA web project
+    - name: Build web project
       run: |
         export NITRO_PRESET=static
         bun run build || npx vite build --ssr false || true
 
-    # Создаём конфигурацию Capacitor в одну строчку без EOF
-    - name: Create Capacitor Config
-      run: echo "export default { appId: 'com.pulselink.messenger', appName: 'PulseLink Messenger', webDir: '.output/public' };" > capacitor.config.ts
-
+    # ИНИЦИАЛИЗИРУЕМ ЧЕРЕЗ СТАНДАРТНУЮ КОМАНДУ БЕЗ СЛОЖНОГО СИНТАКСИСЯ
     - name: Initialize Capacitor Android
       run: |
         rm -rf android || true
+        rm -f capacitor.config.* || true
+        npx cap init "PulseLink Messenger" "com.pulselink.messenger" --web-dir=.output/public
         npx cap add android
         npx cap sync android
 
