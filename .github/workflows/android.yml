@@ -31,45 +31,15 @@ jobs:
         bun install
         bun add @capacitor/core @capacitor/cli @capacitor/android
 
-    - name: Build web project
+    # Собираем строго статический клиентский SPA
+    - name: Build SPA web project
       run: |
-        bun run build || npx vite build || true
+        export NITRO_PRESET=static
+        bun run build || npx vite build --ssr false || true
 
-    # ЖЁСТКО СУЕМ INDEX.HTML ТУДА, ГДЕ ЕГО ИЩЕТ CAPACITOR
-    - name: Fix Lovable SSR Assets Structure
-      run: |
-        mkdir -p .output/public
-        if [ -f "index.html" ]; then
-          cp index.html .output/public/
-        else
-          cat <<EOF > .output/public/index.html
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>PulseLink Messenger</title>
-              <script type="module" src="/assets/index-CZzi9eoL.js"></script>
-              <link rel="stylesheet" href="/assets/styles-Ve9W4l3G.css">
-          </head>
-          <body>
-              <div id="root"></div>
-          </body>
-          </html>
-          EOF
-        fi
-
+    # Создаём конфигурацию Capacitor в одну строчку без EOF
     - name: Create Capacitor Config
-      run: |
-        cat <<EOF > capacitor.config.ts
-        import { CapacitorConfig } from '@capacitor/cli';
-        const config: CapacitorConfig = {
-          appId: 'com.pulselink.messenger',
-          appName: 'PulseLink Messenger',
-          webDir: '.output/public'
-        };
-        export default config;
-        EOF
+      run: echo "export default { appId: 'com.pulselink.messenger', appName: 'PulseLink Messenger', webDir: '.output/public' };" > capacitor.config.ts
 
     - name: Initialize Capacitor Android
       run: |
