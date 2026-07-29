@@ -21,21 +21,20 @@ jobs:
         unzip -o project.zip -d ./ || true
         rm -f project.zip
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
+    # Ставим Bun, так как Lovable создал проект на нем
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
       with:
-        node-version: 24
+        bun-version: latest
 
     - name: Install dependencies
       run: |
-        npm install --legacy-peer-deps || npm install
-        npm install @capacitor/core @capacitor/cli @capacitor/android
+        bun install
+        bun add @capacitor/core @capacitor/cli @capacitor/android
 
     - name: Build web project
       run: |
-        if [ -f "package.json" ] && grep -q '"build":' package.json; then
-          npm run build || npx vite build || true
-        fi
+        bun run build || npx vite build || true
 
     - name: Initialize Capacitor
       run: |
