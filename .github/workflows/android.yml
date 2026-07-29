@@ -36,24 +36,10 @@ jobs:
         if [ -f "package.json" ] && grep -q '"build":' package.json; then
           npm run build || npx vite build || true
         fi
-        if [ ! -d "dist" ]; then
-          if [ -d "build" ]; then
-            mv build dist
-          elif [ -d "out" ]; then
-            mv out dist
-          else
-            mkdir -p dist
-            cp -r . dist/ 2>/dev/null || true
-            cp index.html dist/ 2>/dev/null || true
-          fi
-        fi
-        if [ ! -f "dist/index.html" ] && [ -f "index.html" ]; then
-          cp index.html dist/
-        fi
 
     - name: Initialize Capacitor
       run: |
-        npx cap init "PulseLink Messenger" "com.pulselink.messenger" --web-dir=dist --inline
+        npx cap init "PulseLink Messenger" "com.pulselink.messenger" --web-dir=.output/public
         npx cap add android || true
         npx cap sync android
 
@@ -69,7 +55,6 @@ jobs:
         chmod +x gradlew
         ./gradlew assembleDebug || ./gradlew assemble
 
-    # ХИТРЫЙ ШАГ: Ищем APK файл, где бы он ни спрятался
     - name: Find and Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
