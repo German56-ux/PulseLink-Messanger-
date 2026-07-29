@@ -16,7 +16,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # ПРИНУДИТЕЛЬНО РАСПАКОВЫВАЕМ ТВОЙ АРХИВ, ЧТОБЫ ПОЯВИЛСЯ package.json
     - name: Unpack Project
       run: |
         unzip -o project.zip -d ./ || true
@@ -36,14 +35,29 @@ jobs:
       run: |
         if [ -f "package.json" ] && grep -q '"build":' package.json; then
           npm run build || npx vite build || true
-        else
-          mkdir -p dist
-          cp -r . dist/ || true
+        fi
+        
+        # ЕСЛИ ЛОВЕЙБЛ НЕ СОЗДАЛ DIST, ИЩЕМ КУДА ОН СБРОСИЛ ИЛИ СОЗДАЕМ РУКАМИ
+        if [ ! -d "dist" ]; then
+          if [ -d "build" ]; then
+            mv build dist
+          elif [ -d "out" ]; then
+            mv out dist
+          else
+            mkdir -p dist
+            cp -r . dist/ 2>/dev/null || true
+            cp index.html dist/ 2>/dev/null || true
+          fi
+        fi
+        
+        # Подстраховка: проверяем, есть ли index.html в dist
+        if [ ! -f "dist/index.html" ] && [ -f "index.html" ]; then
+          cp index.html dist/
         fi
 
     - name: Initialize Capacitor
       run: |
-        npx cap init "PulseLink Messenger" "com.pulselink.messenger" --web-dir=dist || true
+        npx cap init "PulseLink Messenger" "com.pulselink.messenger" --web-dir=dist --inline
         npx cap add android || true
         npx cap sync android
 
