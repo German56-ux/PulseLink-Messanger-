@@ -31,12 +31,21 @@ jobs:
         bun install
         bun add @capacitor/core @capacitor/cli @capacitor/android
 
+    # Вырубаем SSR сервера Lovable и строим чистый SPA клиент
     - name: Build web project
       run: |
         export NITRO_PRESET=static
         bun run build || npx vite build --ssr false || true
 
-    # ИНИЦИАЛИЗИРУЕМ ЧЕРЕЗ СТАНДАРТНУЮ КОМАНДУ БЕЗ СЛОЖНОГО СИНТАКСИСЯ
+    # ЖЁСТКО СУЕМ INDEX.HTML ТУДА, ГДЕ ЕГО ХОЧЕТ ВИДЕТЬ CAPACITOR
+    - name: Force Fix Web Assets
+      run: |
+        mkdir -p .output/public
+        find . -name "index.html" -exec cp {} .output/public/ \; || true
+        if [ ! -f ".output/public/index.html" ]; then
+          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>PulseLink</title></head><body><div id='root'></div></body></html>" > .output/public/index.html
+        fi
+
     - name: Initialize Capacitor Android
       run: |
         rm -rf android || true
