@@ -21,7 +21,6 @@ jobs:
         unzip -o project.zip -d ./ || true
         rm -f project.zip
 
-    # Ставим Bun, так как Lovable создал проект на нем
     - name: Setup Bun
       uses: oven-sh/setup-bun@v1
       with:
@@ -36,10 +35,9 @@ jobs:
       run: |
         bun run build || npx vite build || true
 
-    - name: Initialize Capacitor
+    # ИСПРАВЛЕННЫЙ ШАГ: Просто синхронизируем код с уже готовой папкой android
+    - name: Sync Capacitor
       run: |
-        npx cap init "PulseLink Messenger" "com.pulselink.messenger" --web-dir=.output/public
-        npx cap add android || true
         npx cap sync android
 
     - name: Set up JDK 17
