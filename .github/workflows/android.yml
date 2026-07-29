@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main, master ]
 
-# Врубаем абсолютно все обходы блокировок GitHub по версиям
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
@@ -16,6 +15,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    # ПРИНУДИТЕЛЬНО РАСПАКОВЫВАЕМ ТВОЙ АРХИВ, ЧТОБЫ ПОЯВИЛСЯ package.json
+    - name: Unpack Project
+      run: |
+        unzip -o project.zip -d ./ || true
+        rm -f project.zip
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
