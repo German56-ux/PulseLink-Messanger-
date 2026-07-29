@@ -35,7 +35,30 @@ jobs:
       run: |
         bun run build || npx vite build || true
 
-    # ЖЁСТКО СОЗДАЕМ КОНФИГ ТАК, КАК ТРЕБУЕТ РОБОТ
+    # ЖЁСТКО СУЕМ INDEX.HTML ТУДА, ГДЕ ЕГО ИЩЕТ CAPACITOR
+    - name: Fix Lovable SSR Assets Structure
+      run: |
+        mkdir -p .output/public
+        if [ -f "index.html" ]; then
+          cp index.html .output/public/
+        else
+          cat <<EOF > .output/public/index.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>PulseLink Messenger</title>
+              <script type="module" src="/assets/index-CZzi9eoL.js"></script>
+              <link rel="stylesheet" href="/assets/styles-Ve9W4l3G.css">
+          </head>
+          <body>
+              <div id="root"></div>
+          </body>
+          </html>
+          EOF
+        fi
+
     - name: Create Capacitor Config
       run: |
         cat <<EOF > capacitor.config.ts
@@ -48,7 +71,6 @@ jobs:
         export default config;
         EOF
 
-    # УДАЛЯЕМ СТАРЫЙ МУСОР И СОЗДАЕМ АНДРОИД С НУЛЯ
     - name: Initialize Capacitor Android
       run: |
         rm -rf android || true
